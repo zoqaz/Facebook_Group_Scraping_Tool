@@ -48,10 +48,6 @@ date_repl = {
     "·": ""
     }
 
-# logging.basicConfig(format='[%(levelname)s - %(asctime)s]: %(message)s', level=logging.INFO)
-# logging.addLevelName( logging.WARNING, "\x1b[33;20m%s\x1b[0m" % logging.getLevelName(logging.WARNING))
-# logging.addLevelName( logging.ERROR, "\033[1;31m%s\x1b[31;1m" % logging.getLevelName(logging.ERROR))
-
 class ColoredFormatter(logging.Formatter):
     # Define ANSI escape codes for various log levels
     COLORS = {
@@ -99,7 +95,7 @@ def chromeopts():
     opts.add_argument("--disable-background-networking")
     opts.add_argument("--disable-default-apps")
     opts.add_argument("--disable-hang-monitor")
-    opts.add_argument("--disable-popup-blocking")  # If you manage pop-ups manually
+    opts.add_argument("--disable-popup-blocking") 
     opts.add_argument("--disable-prompt-on-repost")
     opts.add_argument("--disable-background-timer-throttling")
     opts.add_argument("--disable-breakpad")
@@ -110,13 +106,13 @@ def chromeopts():
     opts.add_argument("--disable-web-security")
     opts.add_argument("--disable-session-crashed-bubble")
     opts.add_argument("--disable-restore-session-state")  
-    opts.add_argument("--process-per-site")  # Use a single process per site
-    opts.add_argument("--single-process")  # Runs the renderer and plugins in the same process (use with caution, can be unstable)
+    opts.add_argument("--process-per-site") 
+    opts.add_argument("--single-process")  
   
 
-    opts.add_argument("--enable-logging")  # Enables logging.
-    opts.add_argument("--v=1")  # Sets the verbosity level of logging.
-    opts.add_argument("--log-level=0")  # Log all messages. Default is 0.
+    opts.add_argument("--enable-logging")  
+    opts.add_argument("--v=1")  
+    opts.add_argument("--log-level=0")  
 
     # Path where ChromeDriver logs will be saved
     opts.add_argument("--log-path=chromedriver.log")
@@ -191,8 +187,6 @@ def build_figs(df, folder, timestamp):
     plt.ylabel('Memory consumption (%)')
     plt.xlabel('Post Count')
     plt.plot(df["postcount"], df["mem_percent"])
-    # plt.plot(df['postcount'], df['mem_used']) 
-    # plt.legend()
     plt.savefig(f'logs/{folder}/{timestamp}/overall_mem.png')
     plt.clf()
 
@@ -241,28 +235,6 @@ def scrapePage(element):
     # el3 = element.get_attribute("outerText")
     return el1, el2
 
-# def delete_post(post_list, webdriver, webdriver_posts):
-#     post_list = list(dict.fromkeys(post_list))
-#     print(post_list)
-#     #last_post = post_list.pop()
-#     print('Deleting Posts')
-#     while len(post_list) > 0:
-#         del_posinset = post_list.pop()
-#         print('Deleting post:', del_posinset)
-#         try:
-#             del_element = webdriver_posts[del_posinset]
-#             webdriver.execute_script("""
-#                 var element = arguments[0];
-#                 element.parentNode.removeChild(element);
-#                 """, del_element)
-#         except Exception as error:
-#             print(error)
-#             continue
-
-#         time.sleep(0.5)
-#     #post_list.append(last_post)
-#     return post_list
-
 def count_classes(driver):
     elements = driver.find_elements(By.XPATH, "//*")  # Select all elements in the page
     class_counts = Counter()
@@ -274,37 +246,29 @@ def count_classes(driver):
     return class_counts
 
 def delete_post(post_list, webdriver):
-    #post_list = list(dict.fromkeys(post_list))
-    #last_post = post_list.pop()
-    del_list = []  # This will store the posinsets of successfully deleted posts.
-    error_list = []  # This will store any errors that occur.
+    del_list = []  
+    error_list = []  
     while len(post_list) > 0:
         del_posinset = post_list.pop()
-        # print('Deleting post:', len(post_list))
         try:
             del_element = del_posinset
             del_list.append(del_element.get_attribute("aria-posinset"))
             webdriver.execute_script(
-                # var element = arguments[0];
-                # element.parentNode.removeChild(element);
-                # element = null;  // Dereference to aid garbage collection
                 """
                 var element = arguments[0];
                 var parent = element.parentNode;
                 if (parent) {
-                    var clone = element.cloneNode(true); // Clone the node, deep-copying its children
-                    parent.replaceChild(clone, element); // Replace the original with its clone
-                    clone.remove(); // Remove the clone from the DOM
+                    var clone = element.cloneNode(true); 
+                    parent.replaceChild(clone, element); 
+                    clone.remove(); 
                 }
-                element = null;  // Dereference the original node to aid garbage collection
+                element = null; 
                 """, del_element)
         except Exception as error:
-            print(error)
+            logging.error(error)
             continue
-
         time.sleep(0.5)
-    #post_list.append(last_post)
-    print('deleted posts:', del_list)
+    logging.info('deleted posts:', del_list)
     return post_list
 
 def parse_single_post(el1, el2, webpage, single_post):
