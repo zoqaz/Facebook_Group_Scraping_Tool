@@ -3,7 +3,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
+import argparse
 import pandas as pd
 import time
 import random as rand
@@ -71,7 +74,7 @@ logger = logging.getLogger()
 handler = logging.StreamHandler()
 handler.setFormatter(ColoredFormatter())
 logger.addHandler(handler)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 def chromeopts():
     opts = webdriver.ChromeOptions()
@@ -207,15 +210,15 @@ def build_figs(df, folder, timestamp):
 def say(msg, voice = "Victoria"):
     os.system(f'say -v {voice} {msg}')
 
-def pickleDump(pklfile, htmltype, ts, run):
+def pickleDump(pklfile, htmltype, ts):
     if htmltype == 'innertext':
-        with open(f'outputs/02/{htmltype}/{ts}_posinset_inner_{run}.pkl', 'wb') as f:
+        with open(f'outputs/02/{htmltype}/{ts}_posinset_inner.pkl', 'wb') as f:
             pickle.dump(pklfile, f)
     elif htmltype == 'outerhtml':
-        with open(f'outputs/02/{htmltype}/{ts}_posinset_html_{run}.pkl', 'wb') as f:
+        with open(f'outputs/02/{htmltype}/{ts}_posinset_html.pkl', 'wb') as f:
             pickle.dump(pklfile, f)
     elif htmltype == 'outertext':
-        with open(f'outputs/02/{htmltype}/{ts}_posinset_outer_{run}.pkl', 'wb') as f:
+        with open(f'outputs/02/{htmltype}/{ts}_posinset_outer.pkl', 'wb') as f:
             pickle.dump(pklfile, f)
     else:
         logging.error('PICKLEFILE NOT DUMPED')
@@ -268,7 +271,7 @@ def delete_post(post_list, webdriver):
             logging.error(error)
             continue
         time.sleep(0.5)
-    logging.info('deleted posts:', del_list)
+    logging.info(f'deleted posts: {del_list}')
     return post_list
 
 def parse_single_post(el1, el2, webpage, single_post):
